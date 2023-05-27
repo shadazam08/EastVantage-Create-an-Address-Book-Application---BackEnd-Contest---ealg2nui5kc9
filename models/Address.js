@@ -27,9 +27,18 @@ const addressSchema = new mongoose.Schema({
     required: true
 },
   location: {
-    type: String,
-    coordinates: String,
+   type: {
+     type: String,
+     enum: ['pint'],
+     require: true
+   },
+    coordinates:{
+      type: [Number],
+      required: true
+    }
+  }
 });
+addressSchema.index({ location: '2dsphere'});
 
 const Address = mongoose.model('Address', addressSchema);
 
