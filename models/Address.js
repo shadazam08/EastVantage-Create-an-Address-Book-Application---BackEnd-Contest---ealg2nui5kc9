@@ -18,6 +18,17 @@ Here's a sample object for this schema:
 */
 const addressSchema = new mongoose.Schema({
     //Write your code here
+  name: {
+    type: String,
+    required: true
+  },
+  address: {
+    type: String,
+    required: true
+},
+  location: {
+    type: String,
+    coordinates: String,
 });
 
 const Address = mongoose.model('Address', addressSchema);
