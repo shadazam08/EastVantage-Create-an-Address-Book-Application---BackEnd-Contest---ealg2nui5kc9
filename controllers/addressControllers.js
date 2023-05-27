@@ -46,6 +46,27 @@ Output:
 */
 createAddress = async (req, res, next) => {
   // Write your code here
+  const { name, address, latitude, longitude } = req.body;
+
+    if (!name || !address || !latitude || !longitude) {
+        return res.status(400).json({ message: 'Please provide all required information' });
+    }
+
+    try {
+        const newAddress = new Address({
+            name,
+            address,
+            location: {
+                type: 'Point',
+                coordinates: [longitude, latitude]
+            }
+        });
+        
+        const savedAddress = await newAddress.save();
+        res.status(201).json({ message: 'Address created successfully', address: savedAddress });
+    } catch (error) {
+        next(error);
+    }
 };
 
 // Update an existing address
@@ -87,6 +108,27 @@ Sample output:
 */
 updateAddress = async (req, res, next) => {
   // Write your code here
+  const { name, address, latitude, longitude } = req.body;
+    const { id } = req.params;
+
+    if (!name || !address || !latitude || !longitude || !id) {
+        return res.status(400).json({ message: 'Please provide all required information' });
+    }
+
+    try {
+        const updatedAddress = await Address.findByIdAndUpdate(id, {
+            name,
+            address,
+            location: {
+                type: 'Point',
+                coordinates: [longitude, latitude]
+            }
+        }, { new: true });
+
+        res.status(200).json({ message: 'Address updated successfully', address: updatedAddress });
+    } catch (error) {
+        next(error);
+    }
 };
 
 // Delete an existing address
@@ -104,6 +146,14 @@ Sample Output:
 */
 deleteAddress = async (req, res, next) => {
   //Write your code here
+   const { id } = req.params;
+
+    try {
+        await Address.findByIdAndDelete(id);
+        res.status(200).json({ message: 'Address deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
 };
 
 // Get addresses within a given distance and location
@@ -157,6 +207,29 @@ Content-Type: application/json
 */
 getAddressesWithinDistance = async (req, res, next) => {
   //Write your code here
+  const { latitude, longitude, distance } = req.query;
+
+    if (!latitude || !longitude || !distance) {
+        return res.status(400).json({ message: 'Please provide all required information' });
+    }
+
+    try {
+        const addresses = await Address.find({
+            location: {
+                $near: {
+                    $geometry: {
+                        type: 'Point',
+                        coordinates: [Number(longitude), Number(latitude)]
+                    },
+                    $maxDistance: Number(distance)
+                }
+            }
+        });
+
+        res.status(200).json({ addresses });
+    } catch (error) {
+        next(error);
+    }
 };
 
 module.exports = {createAddress, updateAddress, deleteAddress, getAddressesWithinDistance}
